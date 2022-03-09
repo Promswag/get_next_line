@@ -6,7 +6,7 @@
 /*   By: gbaumgar <gbaumgar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/08 14:32:05 by gbaumgar          #+#    #+#             */
-/*   Updated: 2022/03/08 18:00:25 by gbaumgar         ###   ########.fr       */
+/*   Updated: 2022/03/09 14:25:13 by gbaumgar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,16 +30,15 @@ static char	*gnl_buffer_handler(int fd, char *str)
 	int		reading;
 
 	reading = 1;
-	while (!gnl_is_a_line(str) && reading)
+	while (gnl_is_a_line(str) == -1 && reading)
 	{
 		tmp = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 		if (tmp)
 		{
 			reading = read(fd, tmp, BUFFER_SIZE + 1);
+			tmp[reading] = '\0';
 			str = ft_strjoin(str, tmp);
 		}
-		else
-			return (NULL);
 	}
 	return (str);
 }
@@ -51,24 +50,22 @@ char	*get_next_line(int fd)
 	char		*next_line;
 	int			index;
 
-	if (tmp == NULL)
+	if (!tmp)
 	{
-		tmp = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		read(fd, tmp, BUFFER_SIZE + 1);
-	}	
-	if (tmp)
-		gnl_buffer_handler(fd, tmp);
-	printf("%s", tmp);
-	printf("1\n");
+		tmp = malloc(sizeof(char));
+		*tmp = '\0';
+	}
+	tmp = gnl_buffer_handler(fd, tmp);
 	index = gnl_is_a_line(tmp) + 1;
-	printf("2\n");
+	if (!index)
+	{
+		line = tmp;
+		tmp = NULL;
+		return (line);
+	}
 	line = ft_substr(tmp, 0, index);
-	printf("3\n");
 	next_line = ft_substr(tmp, index, ft_strlen(tmp) - index);
-	printf("4\n");
 	free(tmp);
-	printf("5\n");
 	tmp = next_line;
-	printf("6\n");
 	return (line);
 }
