@@ -6,7 +6,7 @@
 /*   By: gbaumgar <gbaumgar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/08 14:32:43 by gbaumgar          #+#    #+#             */
-/*   Updated: 2022/03/08 17:59:39 by gbaumgar         ###   ########.fr       */
+/*   Updated: 2022/03/09 17:02:04 by gbaumgar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ char	*ft_strjoin(char *s1, char *s2)
 		str[i] = '\0';
 	}
 	free(s1);
-	free(s2);
 	return (str);
 }
 
@@ -69,27 +68,20 @@ char	*ft_substr(char *s, unsigned int start, size_t len)
 	}
 	if (start + len > l)
 		len = l - start;
-	str = malloc(sizeof(char) * (len + 1));
-	if (str)
-		ft_strlcpy(str, s + start, len + 1);
-	return (str);
+	return (ft_strldup(s + start, len));
 }
 
-size_t	ft_strlcpy(char *dst, char *src, size_t dstsize)
+char	*ft_strldup(char *s1, size_t len)
 {
 	size_t	i;
-	size_t	l;
+	char	*str;
 
-	i = 0;
-	l = ft_strlen(src);
-	if (dstsize)
-	{
-		while (i < l && i < dstsize - 1)
-		{
-			dst[i] = src[i];
-			i++;
-		}
-		dst[i] = '\0';
-	}
-	return (l);
+	str = malloc(sizeof(char) * (len + 1));
+	if (!str)
+		return (NULL);
+	i = -1;
+	while (++i < len)
+		str[i] = s1[i];
+	str[i] = '\0';
+	return (str);
 }

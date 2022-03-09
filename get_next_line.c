@@ -6,12 +6,11 @@
 /*   By: gbaumgar <gbaumgar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/08 14:32:05 by gbaumgar          #+#    #+#             */
-/*   Updated: 2022/03/09 14:25:13 by gbaumgar         ###   ########.fr       */
+/*   Updated: 2022/03/09 17:14:48 by gbaumgar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
 
 static int	gnl_is_a_line(char *str)
 {
@@ -26,46 +25,65 @@ static int	gnl_is_a_line(char *str)
 
 static char	*gnl_buffer_handler(int fd, char *str)
 {
-	char	*tmp;
+	char	buffer[BUFFER_SIZE + 1];
 	int		reading;
 
 	reading = 1;
+	if (!str)
+		return (NULL);
 	while (gnl_is_a_line(str) == -1 && reading)
 	{
-		tmp = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		if (tmp)
+		reading = read(fd, buffer, BUFFER_SIZE);
+		if (reading < 0)
 		{
-			reading = read(fd, tmp, BUFFER_SIZE + 1);
-			tmp[reading] = '\0';
-			str = ft_strjoin(str, tmp);
+			free(str);
+			return (NULL);
 		}
+		buffer[reading] = '\0';
+		str = ft_strjoin(str, buffer);
 	}
 	return (str);
+}
+
+char	*gnl_retrieve_line(char **str)
+{
+	char	*line;
+	char	*next_line;
+	int		index;
+
+	index = gnl_is_a_line(*str);
+	if (index == -1)
+	{
+		line = *str;
+		*str = NULL;
+		return (line);
+	}
+	line = ft_substr(*str, 0, index + 1);
+	next_line = ft_substr(*str, index + 1, ft_strlen(*str) - index - 1);
+	free(*str);
+	*str = next_line;
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*tmp;
-	char		*line;
-	char		*next_line;
-	int			index;
 
+	if (fd < 0)
+		return (NULL);
 	if (!tmp)
 	{
 		tmp = malloc(sizeof(char));
 		*tmp = '\0';
 	}
 	tmp = gnl_buffer_handler(fd, tmp);
-	index = gnl_is_a_line(tmp) + 1;
-	if (!index)
+	if (!tmp)
+		return (NULL);
+	if (!ft_strlen(tmp))
 	{
-		line = tmp;
+		free(tmp);
 		tmp = NULL;
-		return (line);
+		return (NULL);
 	}
-	line = ft_substr(tmp, 0, index);
-	next_line = ft_substr(tmp, index, ft_strlen(tmp) - index);
-	free(tmp);
-	tmp = next_line;
-	return (line);
+	return (gnl_retrieve_line(&tmp));
 }
